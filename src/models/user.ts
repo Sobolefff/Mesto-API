@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema(
   {
@@ -6,14 +6,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       minlength: 2,
       maxlength: 30,
-      default: "Spider-Man",
+      default: 'Spider-Man',
       required: true,
     },
     about: {
       type: String,
       minlength: 2,
       maxlength: 200,
-      default: "Friendly Neighborhood",
+      default: 'Friendly Neighborhood',
       required: true,
     },
     avatar: {
@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { versionKey: false }
+  { versionKey: false },
 );
 
-export default mongoose.model("user", userSchema);
+export default mongoose.model('user', userSchema);
