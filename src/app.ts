@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import mongoose from 'mongoose';
-import router from './routes/users';
+import usersRouter from './routes/users';
+import cardsRouter from './routes/cards';
 
 interface IRequest extends Request {
   user?: {
@@ -28,8 +29,9 @@ app.use((req: IRequest, res: Response, next) => {
 });
 
 app.use(express.json());
-app.use('/', router);
-
+app.use('/users', usersRouter);
+app.use('/cards', cardsRouter);
+app.all('/*', (req, res) => res.status(404).json({ message: 'Страница не существует' }));
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
 });

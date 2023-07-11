@@ -6,14 +6,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       minlength: 2,
       maxlength: 30,
-      default: 'Spider-Man',
       required: true,
     },
     about: {
       type: String,
       minlength: 2,
       maxlength: 200,
-      default: 'Friendly Neighborhood',
       required: true,
     },
     avatar: {

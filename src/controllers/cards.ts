@@ -35,7 +35,7 @@ export const deleteCard = (req: IRequest, res: Response): void => {
     .then((card) => {
       if (card === null) {
         res
-          .status(STATUS_400)
+          .status(STATUS_404)
           .send({ message: 'Передан несуществующий _id карточки' });
         return;
       }
