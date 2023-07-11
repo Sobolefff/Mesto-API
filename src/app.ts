@@ -29,8 +29,8 @@ app.use((req: IRequest, res: Response, next) => {
 });
 
 app.use(express.json());
-app.use('/users', usersRouter);
-app.use('/cards', cardsRouter);
+app.use('/', usersRouter);
+app.use('/', cardsRouter);
 app.all('/*', (req, res) => res.status(404).json({ message: 'Страница не существует' }));
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);

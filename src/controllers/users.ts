@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import User from '../models/user';
+import User, { IUser } from '../models/user';
 import { STATUS_400, STATUS_404, STATUS_500 } from '../utils/constants';
 
 interface IRequest extends Request {
@@ -37,7 +37,7 @@ export const findUserById = (req: Request, res: Response): void => {
 export const createUser = (req: Request, res: Response): void => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
-    .then((user) => res.send({ data: user }))
+    .then((user: IUser) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(STATUS_400).send({

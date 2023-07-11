@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { STATUS_400, STATUS_404, STATUS_500 } from '../utils/constants';
-import Card from '../models/card';
+import Card, { ICard } from '../models/card';
 
 interface IRequest extends Request {
   user?: {
@@ -18,7 +18,7 @@ export const createCard = (req: IRequest, res: Response): void => {
   console.log(req.user?._id);
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user?._id })
-    .then((card) => res.send({ data: card }))
+    .then((card: ICard) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(STATUS_400).send({
