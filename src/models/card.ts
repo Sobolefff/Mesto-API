@@ -24,7 +24,7 @@ const cardSchema = new mongoose.Schema<ICard>({
     required: true,
   },
   likes: {
-    type: Array<mongoose.Schema.Types.ObjectId>,
+    type: [{ type: mongoose.Types.ObjectId, ref: 'user' }],
     default: [],
   },
   createdAt: {
