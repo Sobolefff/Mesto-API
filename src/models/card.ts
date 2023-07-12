@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { linkRegex } from '../utils/constants';
 
 export interface ICard {
   name: string;
@@ -32,5 +33,10 @@ const cardSchema = new mongoose.Schema<ICard>({
     default: Date.now(),
   },
 });
+
+cardSchema.path('link').validate((val) => {
+  const urlRegex = linkRegex;
+  return urlRegex.test(val);
+}, 'Некорректный URL.');
 
 export default mongoose.model<ICard>('card', cardSchema);
