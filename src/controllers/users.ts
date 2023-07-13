@@ -2,28 +2,28 @@ import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { IRequest } from '../types/index';
 import BadRequestError from '../errors/bad-request-err';
-import UnauthorizedError from '../errors/unauthorized-err';
 import NotFoundError from '../errors/not-found-err';
 import ConflictError from '../errors/conflict-err';
-import { STATUS_500, STATUS_11000, SECRET_KEY } from '../utils/constants';
-import User, { IUser } from '../models/user';
+import { SECRET_KEY } from '../utils/constants';
+import User from '../models/user';
 
 const bcrypt = require('bcrypt');
 
 interface IError extends Error {
+  code: number;
   statusCode?: number
 }
 
-export const getAllUsers = (req: Request, res: Response): void => {
+export const getAllUsers = (req: Request, res: Response, next: NextFunction): void => {
   User.find({})
     .then((user) => res.send({ data: user }))
-    .catch(() => res.status(STATUS_500).send({ message: 'Произошла ошибка на сервере' }));
+    .catch(next);
 };
 
 export const findUserById = (req: Request, res: Response, next: NextFunction): void => {
-  User.findById(req.params.userId)
+  User.findById(req.params._id)
     .orFail(() => {
-      throw next(new NotFoundError('Пользователь по указанному id не найден'));
+      throw new NotFoundError('Пользователь по указанному id не найден');
     })
     .then((user) => {
       res.send({ data: user });
@@ -45,13 +45,15 @@ export const createUser = (req: IRequest, res: Response, next: NextFunction): vo
     .then((hash: string | number) => User.create({
       email, password: hash, name, about, avatar,
     }))
-    .then((user: IUser) => res.send({ data: user }))
+    .then(() => res.send({
+      name, about, avatar, email,
+    }))
     .catch((err: IError) => {
-      if (err.name === 'BadRequestError') {
+      if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
       }
-      if (err.name === 'ConflictError' || err.statusCode === STATUS_11000) {
-        throw next(new ConflictError('Пользователь с таким email уже существует'));
+      if (err.code === 11000) {
+        next(new ConflictError('Пользователь с таким email уже существует'));
       }
       next(err);
     });
@@ -60,7 +62,7 @@ export const createUser = (req: IRequest, res: Response, next: NextFunction): vo
 export const getUserInfo = (req: IRequest, res: Response, next: NextFunction): void => {
   User.findById(req.user!._id)
     .orFail(() => {
-      throw next(new NotFoundError('Пользователь по указанному id не найден'));
+      throw new NotFoundError('Пользователь по указанному id не найден');
     })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
@@ -83,7 +85,7 @@ export const updateUserInfo = (req: IRequest, res: Response, next: NextFunction)
     },
   )
     .orFail(() => {
-      throw next(new NotFoundError('Пользователь по указанному id не найден'));
+      throw new NotFoundError('Пользователь по указанному id не найден');
     })
     .then((user) => {
       if (user !== null) {
@@ -91,7 +93,7 @@ export const updateUserInfo = (req: IRequest, res: Response, next: NextFunction)
       }
     })
     .catch((err) => {
-      if (err.name === 'BadRequestError') {
+      if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
       } else {
         next(err);
@@ -111,7 +113,7 @@ export const updateUserAvatar = (req: IRequest, res: Response, next: NextFunctio
     },
   )
     .orFail(() => {
-      throw next(new NotFoundError('Пользователь по заданному id не найден'));
+      throw new NotFoundError('Пользователь по заданному id не найден');
     })
     .then((user) => {
       if (user !== null) {
@@ -119,7 +121,7 @@ export const updateUserAvatar = (req: IRequest, res: Response, next: NextFunctio
       }
     })
     .catch((err) => {
-      if (err.name === 'BadRequestError') {
+      if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при обновлении аватара'));
       } else {
         next(err);
@@ -138,12 +140,5 @@ export const login = (req: IRequest, res: Response, next: NextFunction) => {
       );
       res.send({ token });
     })
-    .catch((err) => {
-      if (err.name === 'BadRequestError') {
-        next(new BadRequestError('Оба поля должны быть заполнены'));
-      } else {
-        next(new UnauthorizedError('Передан неккоректный email'));
-      }
-      next(err);
-    });
+    .catch(next);
 };

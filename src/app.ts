@@ -6,13 +6,14 @@ import bodyParser = require('body-parser');
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import {
-  PORT, LINK, STATUS_500, STATUS_404, linkRegex,
+  PORT, LINK, STATUS_500, linkRegex,
 } from './utils/constants';
 import { requestLogger, errorLogger } from './middlewares/logger';
 import { createUser, login } from './controllers/users';
 import cardsRouter from './routes/cards';
 import usersRouter from './routes/users';
 import auth from './middlewares/auth';
+import NotFoundError from './errors/not-found-err';
 
 interface IError extends Error {
   statusCode?: number
@@ -64,9 +65,9 @@ app.use(requestLogger);
 app.post('/signin', validateLogin, login);
 app.post('/signup', validateSignUp, createUser);
 app.use(auth);
-app.use('/users', usersRouter);
-app.use('/cards', cardsRouter);
-app.all('/*', (req, res) => res.status(STATUS_404).json({ message: 'Страница не существует' }));
+app.use('/', usersRouter);
+app.use('/', cardsRouter);
+app.all('/*', (req: Request, res: Response, next: NextFunction) => next(new NotFoundError('Страница не существует')));
 app.use(errorLogger);
 app.use(errors());
 app.use((err: IError, req: Request, res: Response, next: NextFunction) => {

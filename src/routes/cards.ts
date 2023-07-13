@@ -16,8 +16,8 @@ router.get('/cards', getAllCards);
 
 router.post('/cards', celebrate({
   body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
-    link: Joi.string().custom((value) => {
+    name: Joi.string().min(2).max(30).required(),
+    link: Joi.string().required().custom((value) => {
       if (validator.isURL(value)) {
         return value;
       }

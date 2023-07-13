@@ -14,13 +14,13 @@ const router = Router();
 
 router.get('/users', getAllUsers);
 
-router.get('/users:Id', celebrate({
+router.get('/users/me', getUserInfo);
+
+router.get('/users/:_id', celebrate({
   params: Joi.object().keys({
     _id: Joi.string().length(24).hex(),
   }),
 }), findUserById);
-
-router.get('/users/me', getUserInfo);
 
 router.patch('/users/me', celebrate({
   body: Joi.object().keys({
@@ -32,7 +32,7 @@ router.patch('/users/me', celebrate({
 router.patch('/users/me/avatar', celebrate({
   body: Joi.object().keys({
     /* eslint-disable-next-line */
-    avatar: Joi.string().pattern(new RegExp(`${linkRegex}`)),
+    avatar: Joi.string().pattern(linkRegex),
   }),
 }), updateUserAvatar);
 

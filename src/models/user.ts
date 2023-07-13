@@ -14,6 +14,7 @@ export interface IUser {
 }
 
 interface UserModel extends Model<IUser> {
+  // eslint-disable-next-line no-unused-vars
   findUserByCredentials: (email: string, password: string) => Promise<Document<unknown, any, IUser>>
 }
 
@@ -52,21 +53,20 @@ const userSchema = new mongoose.Schema<IUser, UserModel>(
     },
     password: {
       type: String,
-      minLength: 8,
       required: true,
       select: false,
     },
   },
 );
 
-userSchema.static('findUserByCredentials', function findUserByCredentials(email: string, password: string, next) {
+userSchema.static('findUserByCredentials', function findUserByCredentials(email: string, password: string) {
   return this.findOne({ email }).select('+password').then((user: any) => {
     if (!user) {
-      return Promise.reject(new Error('Неправильные почта или пароль'));
+      throw new UnauthorizedError('Передан неккоректный пароль');
     }
     return bcrypt.compare(password, user.password).then((matched: any) => {
       if (!matched) {
-        next(new UnauthorizedError('Передан неккоректный пароль'));
+        throw new UnauthorizedError('Передан неккоректный пароль');
       }
       return user;
     });
